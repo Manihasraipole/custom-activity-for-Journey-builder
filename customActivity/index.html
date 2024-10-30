@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Capture Activity</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script type="text/javascript" src="js/postmonger.js"></script>
+    <script type="text/javascript" src="customActivity.js"></script>
+    <style>
+        .form-container {
+            padding: 20px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .field-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="step1" class="step">
+        <div class="form-container">
+            <div class="slds-text-heading_medium">Data Capture Configuration</div>
+            <p>This activity will capture Email and Name from the journey data and send it to the external endpoint.</p>
+            
+            <div class="field-label">External Endpoint URL:</div>
+            <input type="url" id="endpointUrl" class="input-field" 
+                   placeholder="https://your-api-endpoint.com/data"
+                   required />
+            
+            <div id="sourceDataFields">
+                <p>Source Data Fields to be sent:</p>
+                <ul>
+                    <li>Email: {{Contact.Attribute.PreferredData.Email}}</li>
+                    <li>Name: {{Contact.Attribute.PreferredData.Name}}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
