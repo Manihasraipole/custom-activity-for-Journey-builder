@@ -21,7 +21,7 @@
                 }
             ],
             "outArguments": [],
-            "url": "https://your-ngrok-url.ngrok.io/execute",
+            "url": "https://customactivity.netlify.app/execute",
             "timeout": 10000,
             "retryCount": 3,
             "retryDelay": 1000,
@@ -30,16 +30,16 @@
     },
     "configurationArguments": {
         "save": {
-            "url": "https://your-ngrok-url.ngrok.io/save"
+            "url": "https://customactivity.netlify.app/save"
         },
         "publish": {
-            "url": "https://your-ngrok-url.ngrok.io/publish"
+            "url": "https://customactivity.netlify.app/publish"
         },
         "validate": {
-            "url": "https://your-ngrok-url.ngrok.io/validate"
+            "url": "https://customactivity.netlify.app/validate"
         },
         "stop": {
-            "url": "https://your-ngrok-url.ngrok.io/stop"
+            "url": "https://customactivity.netlify.app/stop"
         }
     },
     "userInterfaces": {
