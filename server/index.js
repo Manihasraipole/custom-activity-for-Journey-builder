@@ -8,8 +8,19 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../customActivity')));
 
+app.use((req, res, next) => {
+    console.log(`Request path: ${req.path}`);
+    next();
+});
+
 app.get('/', (req, res) => {
+    console.log('Serving index.html');
     res.sendFile(path.join(__dirname, '../customActivity/index.html'));
+});
+
+app.use((req, res) => {
+    console.log(`404 - Not Found: ${req.path}`);
+    res.status(404).sendFile(path.join(__dirname, '../customActivity/404.html'));
 });
 
 // Handle execute endpoint

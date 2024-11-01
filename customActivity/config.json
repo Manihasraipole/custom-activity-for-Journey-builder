@@ -2,50 +2,52 @@
     "workflowApiVersion": "1.1",
     "metaData": {
         "icon": "images/icon.png",
-        "iconSmall": "images/icon.png",
-        "category": "custom"
+        "iconSmall": "images/iconSmall.png"
     },
     "type": "REST",
     "lang": {
         "en-US": {
-            "name": "Data Capture Activity",
-            "description": "Captures Email and Name data and sends to external endpoint"
+            "name": "Your Activity Name",
+            "description": "Your Activity Description"
         }
     },
     "arguments": {
         "execute": {
-            "inArguments": [
-                {
-                    "email": "{{Contact.Attribute.PreferredData.Email}}",
-                    "name": "{{Contact.Attribute.PreferredData.Name}}"
-                }
-            ],
+            "inArguments": [],
             "outArguments": [],
-            "url": "https://customactivity.netlify.app/execute",
-            "timeout": 10000,
-            "retryCount": 3,
-            "retryDelay": 1000,
-            "concurrentRequests": 1
+            "url": "/.netlify/functions/api/execute"
+        },
+        "save": {
+            "url": "/.netlify/functions/api/save"
+        },
+        "publish": {
+            "url": "/.netlify/functions/api/publish"
+        },
+        "validate": {
+            "url": "/.netlify/functions/api/validate"
+        },
+        "stop": {
+            "url": "/.netlify/functions/api/stop"
         }
     },
     "configurationArguments": {
         "save": {
-            "url": "https://customactivity.netlify.app/save"
+            "url": "/.netlify/functions/api/save"
         },
         "publish": {
-            "url": "https://customactivity.netlify.app/publish"
+            "url": "/.netlify/functions/api/publish"
         },
         "validate": {
-            "url": "https://customactivity.netlify.app/validate"
+            "url": "/.netlify/functions/api/validate"
         },
         "stop": {
-            "url": "https://customactivity.netlify.app/stop"
+            "url": "/.netlify/functions/api/stop"
         }
     },
     "userInterfaces": {
         "configModal": {
-            "height": 300,
-            "width": 500,
+            "height": 400,
+            "width": 600,
             "fullscreen": false
         }
     }

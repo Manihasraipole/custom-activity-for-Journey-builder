@@ -1,0 +1,43 @@
+[build]
+  publish = "customActivity"
+  command = "# no build command needed"
+
+[[redirects]]
+  from = "/execute"
+  to = "/.netlify/functions/api"
+  status = 200
+  force = true
+  methods = ["POST"]
+
+[[redirects]]
+  from = "/save"
+  to = "/.netlify/functions/api"
+  status = 200
+  force = true
+  methods = ["POST"]
+
+[[redirects]]
+  from = "/validate"
+  to = "/.netlify/functions/api"
+  status = 200
+  force = true
+  methods = ["POST"]
+
+[[redirects]]
+  from = "/publish"
+  to = "/.netlify/functions/api"
+  status = 200
+  force = true
+  methods = ["POST"]
+
+[[redirects]]
+  from = "/stop"
+  to = "/.netlify/functions/api"
+  status = 200
+  force = true
+  methods = ["POST"]
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200 

@@ -1,0 +1,10 @@
+{
+  "name": "sfmc-custom-activity",
+  "version": "1.0.0",
+  "dependencies": {
+    "express": "^4.17.1",
+    "serverless-http": "^2.7.0",
+    "body-parser": "^1.19.0",
+    "axios": "^0.21.1"
+  }
+} 
