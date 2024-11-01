@@ -7,47 +7,47 @@
     "type": "REST",
     "lang": {
         "en-US": {
-            "name": "Your Activity Name",
-            "description": "Your Activity Description"
+            "name": "Custom Data Extension Activity",
+            "description": "Send data to external endpoint"
         }
     },
     "arguments": {
         "execute": {
             "inArguments": [],
             "outArguments": [],
-            "url": "/.netlify/functions/api/execute"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/execute"
         },
         "save": {
-            "url": "/.netlify/functions/api/save"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/save"
         },
         "publish": {
-            "url": "/.netlify/functions/api/publish"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/publish"
         },
         "validate": {
-            "url": "/.netlify/functions/api/validate"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/validate"
         },
         "stop": {
-            "url": "/.netlify/functions/api/stop"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/stop"
         }
     },
     "configurationArguments": {
         "save": {
-            "url": "/.netlify/functions/api/save"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/save"
         },
         "publish": {
-            "url": "/.netlify/functions/api/publish"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/publish"
         },
         "validate": {
-            "url": "/.netlify/functions/api/validate"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/validate"
         },
         "stop": {
-            "url": "/.netlify/functions/api/stop"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/stop"
         }
     },
     "userInterfaces": {
         "configModal": {
-            "height": 400,
-            "width": 600,
+            "height": 600,
+            "width": 800,
             "fullscreen": false
         }
     }
