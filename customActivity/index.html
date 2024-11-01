@@ -7,19 +7,23 @@
     <style>
         .form-group {
             margin: 20px;
-            max-width: 600px;
+            max-width: 800px;
         }
         .form-group label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
         }
-        .form-group input {
+        .form-group input, .form-group textarea {
             width: 100%;
             padding: 8px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
+        }
+        .form-group textarea {
+            min-height: 100px;
+            font-family: monospace;
         }
         .error {
             color: red;
@@ -55,24 +59,58 @@
             border-radius: 4px;
             margin-top: 20px;
         }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .section-title {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: #333;
+        }
     </style>
 </head>
 <body>
     <div class="form-group">
-        <h2>Data Capture Configuration</h2>
-        <p>This activity will capture Email and Name from the journey data and send it to the external endpoint.</p>
+        <h2>API Configuration</h2>
         
-        <label for="endpointUrl">External Endpoint URL:</label>
-        <input type="text" id="endpointUrl" placeholder="https://your-api-endpoint.com/data" />
-        <div id="endpointError" class="error">Please enter a valid endpoint URL</div>
-        <div id="saveSuccess" class="success">Endpoint URL saved successfully!</div>
-        
-        <div class="button-container">
-            <button id="saveEndpoint" class="save-button">Save Endpoint</button>
+        <div class="section">
+            <h3 class="section-title">Endpoint Configuration</h3>
+            <label for="endpointUrl">External Endpoint URL:</label>
+            <input type="text" id="endpointUrl" placeholder="https://your-api-endpoint.com/data" />
+            <div id="endpointError" class="error">Please enter a valid endpoint URL</div>
         </div>
 
+        <div class="section">
+            <h3 class="section-title">Headers Configuration</h3>
+            <p>Enter headers in JSON format (e.g., {"Authorization": "Bearer token", "Content-Type": "application/json"})</p>
+            <textarea id="headers" placeholder='{
+    "Content-Type": "application/json",
+    "Authorization": "Bearer your-token"
+}'></textarea>
+            <div id="headersError" class="error">Please enter valid JSON for headers</div>
+        </div>
+
+        <div class="section">
+            <h3 class="section-title">Request Body Template</h3>
+            <p>Enter body template in JSON format. Use {{Contact.Attribute.PreferredData.Email}} and {{Contact.Attribute.PreferredData.Name}} as placeholders</p>
+            <textarea id="bodyTemplate" placeholder='{
+    "email": "{{Contact.Attribute.PreferredData.Email}}",
+    "name": "{{Contact.Attribute.PreferredData.Name}}",
+    "customField": "value"
+}'></textarea>
+            <div id="bodyError" class="error">Please enter valid JSON for body template</div>
+        </div>
+        
+        <div class="button-container">
+            <button id="saveEndpoint" class="save-button">Save Configuration</button>
+        </div>
+        <div id="saveSuccess" class="success">Configuration saved successfully!</div>
+
         <div class="data-fields">
-            <h3>Source Data Fields to be sent:</h3>
+            <h3>Available Contact Fields:</h3>
             <ul>
                 <li>Email: {{Contact.Attribute.PreferredData.Email}}</li>
                 <li>Name: {{Contact.Attribute.PreferredData.Name}}</li>
@@ -83,9 +121,8 @@
     <script>
         var connection = new Postmonger.Session();
         var payload = {};
-        var lastStepEnabled = false;
         var steps = [ 
-            { "label": "Configure Endpoint", "key": "step1" }
+            { "label": "Configure API", "key": "step1" }
         ];
 
         $(document).ready(function() {
@@ -93,13 +130,11 @@
             connection.trigger('requestTokens');
             connection.trigger('requestEndpoints');
 
-            // Save button click handler
             $('#saveEndpoint').click(function() {
-                saveEndpointUrl();
+                saveConfiguration();
             });
         });
 
-        // This listens for Journey Builder to send tokens
         connection.on('requestedTokens', function(tokens) {
             console.log('Requested tokens:', tokens);
         });
@@ -117,37 +152,65 @@
                 payload['arguments'].execute.inArguments.length > 0
             );
 
-            var inArguments = hasInArguments ? payload['arguments'].execute.inArguments : {};
-
-            // Load the saved endpoint URL if it exists
-            if (inArguments.length > 0) {
-                $('#endpointUrl').val(inArguments[0].endpointUrl);
+            if (hasInArguments) {
+                var inArguments = payload['arguments'].execute.inArguments[0];
+                $('#endpointUrl').val(inArguments.endpointUrl || '');
+                $('#headers').val(inArguments.headers ? JSON.stringify(inArguments.headers, null, 4) : '');
+                $('#bodyTemplate').val(inArguments.bodyTemplate ? JSON.stringify(inArguments.bodyTemplate, null, 4) : '');
             }
         });
 
-        function saveEndpointUrl() {
-            var endpointUrl = $('#endpointUrl').val().trim();
-            
-            if (!endpointUrl) {
-                $('#endpointError').show();
-                $('#saveSuccess').hide();
-                return;
+        function isValidJSON(str) {
+            try {
+                JSON.parse(str);
+                return true;
+            } catch (e) {
+                return false;
             }
+        }
 
-            // Validate URL format
+        function saveConfiguration() {
+            var endpointUrl = $('#endpointUrl').val().trim();
+            var headers = $('#headers').val().trim();
+            var bodyTemplate = $('#bodyTemplate').val().trim();
+            var hasError = false;
+
+            // Validate URL
             try {
                 new URL(endpointUrl);
+                $('#endpointError').hide();
             } catch (e) {
                 $('#endpointError').text('Please enter a valid URL').show();
-                $('#saveSuccess').hide();
+                hasError = true;
+            }
+
+            // Validate headers JSON
+            if (headers && !isValidJSON(headers)) {
+                $('#headersError').show();
+                hasError = true;
+            } else {
+                $('#headersError').hide();
+            }
+
+            // Validate body template JSON
+            if (bodyTemplate && !isValidJSON(bodyTemplate)) {
+                $('#bodyError').show();
+                hasError = true;
+            } else {
+                $('#bodyError').hide();
+            }
+
+            if (hasError) {
                 return;
             }
 
-            // Save the data
+            // Save the configuration
             payload.arguments = payload.arguments || {};
             payload.arguments.execute = payload.arguments.execute || {};
             payload.arguments.execute.inArguments = [{
                 "endpointUrl": endpointUrl,
+                "headers": headers ? JSON.parse(headers) : {},
+                "bodyTemplate": bodyTemplate ? JSON.parse(bodyTemplate) : {},
                 "email": "{{Contact.Attribute.PreferredData.Email}}",
                 "name": "{{Contact.Attribute.PreferredData.Name}}"
             }];
@@ -157,40 +220,12 @@
             console.log('Saving payload:', payload);
             connection.trigger('updateActivity', payload);
 
-            // Show success message
-            $('#endpointError').hide();
-            $('#saveSuccess').show();
-            
-            // Enable the Done button in Journey Builder
+            $('#saveSuccess').show().delay(3000).fadeOut();
             connection.trigger('setActivityDirtyState', false);
         }
 
         connection.on('clickedNext', function() {
-            var endpointUrl = $('#endpointUrl').val().trim();
-            
-            if (!endpointUrl) {
-                $('#endpointError').show();
-                connection.trigger('ready');
-                return;
-            }
-
-            // The configuration will already be saved by the Save button
-            // This just validates before allowing to proceed
-            try {
-                new URL(endpointUrl);
-                connection.trigger('nextStep');
-            } catch (e) {
-                $('#endpointError').text('Please enter a valid URL').show();
-                connection.trigger('ready');
-            }
-        });
-
-        // Validate on field change
-        $('#endpointUrl').on('change keyup', function() {
-            var endpointUrl = $(this).val().trim();
-            if (endpointUrl) {
-                $('#endpointError').hide();
-            }
+            saveConfiguration();
         });
     </script>
 </body>
