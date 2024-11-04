@@ -2,7 +2,8 @@
     "workflowApiVersion": "1.1",
     "metaData": {
         "icon": "images/icon.png",
-        "iconSmall": "images/iconSmall.png"
+        "iconSmall": "images/iconSmall.png",
+        "category": "custom"
     },
     "type": "REST",
     "lang": {
@@ -13,35 +14,41 @@
     },
     "arguments": {
         "execute": {
-            "inArguments": [],
+            "inArguments": [{
+                "email": "{{Contact.Attribute.PreferredData.Email}}",
+                "name": "{{Contact.Attribute.PreferredData.Name}}",
+                "contactKey": "{{Contact.Key}}"
+            }],
             "outArguments": [],
-            "url": "https://customactivity.netlify.app/.netlify/functions/api/execute"
-        },
-        "save": {
-            "url": "https://customactivity.netlify.app/.netlify/functions/api/save"
-        },
-        "publish": {
-            "url": "https://customactivity.netlify.app/.netlify/functions/api/publish"
-        },
-        "validate": {
-            "url": "https://customactivity.netlify.app/.netlify/functions/api/validate"
-        },
-        "stop": {
-            "url": "https://customactivity.netlify.app/.netlify/functions/api/stop"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/execute",
+            "verb": "POST",
+            "body": "",
+            "header": "",
+            "format": "json",
+            "useJwt": true,
+            "timeout": 10000
         }
     },
     "configurationArguments": {
         "save": {
-            "url": "https://customactivity.netlify.app/.netlify/functions/api/save"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/save",
+            "verb": "POST",
+            "useJwt": true
         },
         "publish": {
-            "url": "https://customactivity.netlify.app/.netlify/functions/api/publish"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/publish",
+            "verb": "POST",
+            "useJwt": true
         },
         "validate": {
-            "url": "https://customactivity.netlify.app/.netlify/functions/api/validate"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/validate",
+            "verb": "POST",
+            "useJwt": true
         },
         "stop": {
-            "url": "https://customactivity.netlify.app/.netlify/functions/api/stop"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/stop",
+            "verb": "POST",
+            "useJwt": true
         }
     },
     "userInterfaces": {
@@ -49,6 +56,14 @@
             "height": 600,
             "width": 800,
             "fullscreen": false
+        }
+    },
+    "schema": {
+        "arguments": {
+            "execute": {
+                "inArguments": [],
+                "outArguments": []
+            }
         }
     }
 } 

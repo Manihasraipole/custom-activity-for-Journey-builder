@@ -1,6 +1,7 @@
 [build]
   publish = "customActivity"
   command = "# no build command needed"
+  functions = "netlify/functions"
 
 [[redirects]]
   from = "/.netlify/functions/api/*"
