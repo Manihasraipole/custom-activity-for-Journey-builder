@@ -3,8 +3,7 @@
     "metaData": {
         "icon": "images/icon.png",
         "iconSmall": "images/iconSmall.png",
-        "category": "custom",
-        "isConfigured": true
+        "category": "custom"
     },
     "type": "REST",
     "lang": {
@@ -15,11 +14,7 @@
     },
     "arguments": {
         "execute": {
-            "inArguments": [{
-                "email": "{{Contact.Attribute.PreferredData.Email}}",
-                "name": "{{Contact.Attribute.PreferredData.Name}}",
-                "contactKey": "{{Contact.Key}}"
-            }],
+            "inArguments": [],
             "outArguments": [],
             "url": "https://customactivity.netlify.app/execute",
             "verb": "POST",

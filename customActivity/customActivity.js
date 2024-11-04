@@ -4,10 +4,27 @@ function initializeActivity() {
     let connection = new Postmonger.Session();
     let payload = {};
     let hasEndpoint = false;
+    let initialized = false;
 
+    // Show loading state
+    showLoading(true);
+
+    // Initial handshake with Journey Builder
     connection.trigger('ready');
+    
+    // Set a timeout for initialization
+    const initTimeout = setTimeout(() => {
+        if (!initialized) {
+            showError('Connection timeout. Please refresh the page.');
+            showLoading(false);
+        }
+    }, 10000); // 10 second timeout
 
     connection.on('initActivity', function(data) {
+        initialized = true;
+        clearTimeout(initTimeout);
+        showLoading(false);
+
         if (data) {
             payload = data;
             
@@ -31,9 +48,13 @@ function initializeActivity() {
                     document.getElementById('bodyTemplate').value = JSON.stringify(inArgs.bodyTemplate, null, 2);
                 }
             }
+
+            // Ensure payload has required structure
+            payload['arguments'] = payload['arguments'] || {};
+            payload['arguments'].execute = payload['arguments'].execute || {};
+            payload['metaData'] = payload['metaData'] || {};
+            payload['metaData'].isConfigured = true;
         }
-        
-        connection.trigger('ready');
     });
 
     connection.on('clickedNext', function() {
@@ -78,11 +99,13 @@ function initializeActivity() {
     }
 
     function saveConfiguration() {
+        showLoading(true);
+        
         const validation = validateConfiguration();
         
         if (!validation.isValid) {
             showError(validation.errorMessage);
-            connection.trigger('ready');
+            showLoading(false);
             return;
         }
 
@@ -90,30 +113,42 @@ function initializeActivity() {
         const headers = document.getElementById('headers').value.trim();
         const bodyTemplate = document.getElementById('bodyTemplate').value.trim();
 
-        // Configure the payload
-        payload['arguments'].execute.inArguments = [{
-            "endpointUrl": endpointUrl,
-            "headers": headers ? JSON.parse(headers) : {},
-            "bodyTemplate": bodyTemplate ? JSON.parse(bodyTemplate) : {},
-            "email": "{{Contact.Attribute.PreferredData.Email}}",
-            "name": "{{Contact.Attribute.PreferredData.Name}}",
-            "contactKey": "{{Contact.Key}}"
-        }];
+        try {
+            // Configure the payload
+            payload['arguments'].execute.inArguments = [{
+                "endpointUrl": endpointUrl,
+                "headers": headers ? JSON.parse(headers) : {},
+                "bodyTemplate": bodyTemplate ? JSON.parse(bodyTemplate) : {},
+                "email": "{{Contact.Attribute.PreferredData.Email}}",
+                "name": "{{Contact.Attribute.PreferredData.Name}}",
+                "contactKey": "{{Contact.Key}}"
+            }];
 
-        // Set the activity as configured
-        payload['metaData'].isConfigured = true;
+            // Set the activity as configured
+            payload['metaData'].isConfigured = true;
+            hasEndpoint = true;
 
-        hasEndpoint = true;
-        connection.trigger('updateActivity', payload);
+            connection.trigger('updateActivity', payload);
+            showLoading(false);
+        } catch (error) {
+            console.error('Error saving configuration:', error);
+            showError('Failed to save configuration. Please try again.');
+            showLoading(false);
+        }
     }
 
     // Handle requestedEndpoints event
     connection.on('requestedEndpoints', function() {
-        if (hasEndpoint) {
-            connection.trigger('requestedEndpoints', {
-                endpoints: ['execute', 'save', 'publish', 'validate', 'stop']
-            });
-        }
+        connection.trigger('requestedEndpoints', {
+            endpoints: ['execute', 'save', 'publish', 'validate', 'stop']
+        });
+    });
+
+    // Handle connection errors
+    connection.on('error', function(error) {
+        console.error('Connection error:', error);
+        showError('Connection error occurred. Please refresh the page.');
+        showLoading(false);
     });
 }
 
@@ -126,6 +161,13 @@ function showError(message) {
         setTimeout(() => {
             errorDiv.style.display = 'none';
         }, 3000);
+    }
+}
+
+function showLoading(show) {
+    const loadingDiv = document.getElementById('loading');
+    if (loadingDiv) {
+        loadingDiv.style.display = show ? 'block' : 'none';
     }
 }
 
