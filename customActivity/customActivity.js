@@ -9,147 +9,113 @@ function initializeActivity() {
     // Show loading state
     showLoading(true);
 
-    // Initial handshake with Journey Builder
+    // Only trigger ready once
     connection.trigger('ready');
-    
-    // Set a timeout for initialization
+
+    // Set a shorter timeout for initialization
     const initTimeout = setTimeout(() => {
         if (!initialized) {
-            showError('Connection timeout. Please refresh the page.');
-            showLoading(false);
+            console.log('Initialization timeout - retrying...');
+            connection.trigger('ready');
+            
+            // Set a final timeout
+            setTimeout(() => {
+                if (!initialized) {
+                    showError('Connection timeout. Please refresh the page.');
+                    showLoading(false);
+                }
+            }, 5000);
         }
-    }, 10000); // 10 second timeout
+    }, 5000);
 
     connection.on('initActivity', function(data) {
+        console.log('initActivity triggered with data:', data);
         initialized = true;
         clearTimeout(initTimeout);
         showLoading(false);
 
         if (data) {
             payload = data;
-            
-            // Load the saved configuration if it exists
-            if (payload['arguments'] && 
-                payload['arguments'].execute &&
-                payload['arguments'].execute.inArguments &&
-                payload['arguments'].execute.inArguments.length > 0) {
-                
-                const inArgs = payload['arguments'].execute.inArguments[0];
-                
-                // Restore saved values
-                if (inArgs.endpointUrl) {
-                    document.getElementById('endpointUrl').value = inArgs.endpointUrl;
-                    hasEndpoint = true;
-                }
-                if (inArgs.headers) {
-                    document.getElementById('headers').value = JSON.stringify(inArgs.headers, null, 2);
-                }
-                if (inArgs.bodyTemplate) {
-                    document.getElementById('bodyTemplate').value = JSON.stringify(inArgs.bodyTemplate, null, 2);
-                }
-            }
-
-            // Ensure payload has required structure
-            payload['arguments'] = payload['arguments'] || {};
-            payload['arguments'].execute = payload['arguments'].execute || {};
-            payload['metaData'] = payload['metaData'] || {};
-            payload['metaData'].isConfigured = true;
         }
+
+        // Initialize default payload if empty
+        payload = payload || {};
+        payload['arguments'] = payload['arguments'] || {};
+        payload['arguments'].execute = payload['arguments'].execute || {};
+        payload['arguments'].execute.inArguments = payload['arguments'].execute.inArguments || [{}];
+        payload['metaData'] = payload['metaData'] || {};
+        payload['metaData'].isConfigured = true;
+
+        // Set default values if none exist
+        const defaultValues = {
+            endpointUrl: '',
+            headers: '{\n    "Content-Type": "application/json"\n}',
+            bodyTemplate: '{\n    "email": "{{Contact.Attribute.PreferredData.Email}}",\n    "name": "{{Contact.Attribute.PreferredData.Name}}"\n}'
+        };
+
+        // Try to load saved values
+        try {
+            const inArgs = payload['arguments'].execute.inArguments[0];
+            
+            document.getElementById('endpointUrl').value = inArgs.endpointUrl || defaultValues.endpointUrl;
+            document.getElementById('headers').value = inArgs.headers ? 
+                JSON.stringify(inArgs.headers, null, 4) : defaultValues.headers;
+            document.getElementById('bodyTemplate').value = inArgs.bodyTemplate ? 
+                JSON.stringify(inArgs.bodyTemplate, null, 4) : defaultValues.bodyTemplate;
+            
+            hasEndpoint = !!inArgs.endpointUrl;
+        } catch (e) {
+            console.error('Error loading saved values:', e);
+            // Set default values if there's an error
+            document.getElementById('endpointUrl').value = defaultValues.endpointUrl;
+            document.getElementById('headers').value = defaultValues.headers;
+            document.getElementById('bodyTemplate').value = defaultValues.bodyTemplate;
+        }
+
+        // Enable the save button
+        document.getElementById('saveEndpoint').disabled = false;
+    });
+
+    // Remove the duplicate ready trigger from the click handler
+    document.getElementById('saveEndpoint').addEventListener('click', function() {
+        saveConfiguration();
     });
 
     connection.on('clickedNext', function() {
         saveConfiguration();
     });
 
-    function validateConfiguration() {
-        const endpointUrl = document.getElementById('endpointUrl').value.trim();
-        const headers = document.getElementById('headers').value.trim();
-        const bodyTemplate = document.getElementById('bodyTemplate').value.trim();
-        
-        let isValid = true;
-        let errorMessage = '';
-
-        // Validate URL
-        if (!endpointUrl) {
-            isValid = false;
-            errorMessage = 'Please provide an endpoint URL';
-        }
-
-        // Validate headers if provided
-        if (headers) {
-            try {
-                JSON.parse(headers);
-            } catch (e) {
-                isValid = false;
-                errorMessage = 'Invalid JSON format in headers';
-            }
-        }
-
-        // Validate body template if provided
-        if (bodyTemplate) {
-            try {
-                JSON.parse(bodyTemplate);
-            } catch (e) {
-                isValid = false;
-                errorMessage = 'Invalid JSON format in body template';
-            }
-        }
-
-        return { isValid, errorMessage };
-    }
-
     function saveConfiguration() {
-        showLoading(true);
-        
-        const validation = validateConfiguration();
-        
-        if (!validation.isValid) {
-            showError(validation.errorMessage);
-            showLoading(false);
-            return;
-        }
-
         const endpointUrl = document.getElementById('endpointUrl').value.trim();
         const headers = document.getElementById('headers').value.trim();
         const bodyTemplate = document.getElementById('bodyTemplate').value.trim();
 
         try {
-            // Configure the payload
+            // Validate JSON formats
+            const headerObj = headers ? JSON.parse(headers) : {};
+            const bodyObj = bodyTemplate ? JSON.parse(bodyTemplate) : {};
+
+            // Update the payload
             payload['arguments'].execute.inArguments = [{
                 "endpointUrl": endpointUrl,
-                "headers": headers ? JSON.parse(headers) : {},
-                "bodyTemplate": bodyTemplate ? JSON.parse(bodyTemplate) : {},
+                "headers": headerObj,
+                "bodyTemplate": bodyObj,
                 "email": "{{Contact.Attribute.PreferredData.Email}}",
                 "name": "{{Contact.Attribute.PreferredData.Name}}",
                 "contactKey": "{{Contact.Key}}"
             }];
 
-            // Set the activity as configured
             payload['metaData'].isConfigured = true;
-            hasEndpoint = true;
-
+            
+            console.log('Saving configuration:', payload);
             connection.trigger('updateActivity', payload);
-            showLoading(false);
-        } catch (error) {
-            console.error('Error saving configuration:', error);
-            showError('Failed to save configuration. Please try again.');
-            showLoading(false);
+            
+            showSuccess('Configuration saved successfully!');
+        } catch (e) {
+            console.error('Error saving configuration:', e);
+            showError('Invalid JSON format in headers or body template');
         }
     }
-
-    // Handle requestedEndpoints event
-    connection.on('requestedEndpoints', function() {
-        connection.trigger('requestedEndpoints', {
-            endpoints: ['execute', 'save', 'publish', 'validate', 'stop']
-        });
-    });
-
-    // Handle connection errors
-    connection.on('error', function(error) {
-        console.error('Connection error:', error);
-        showError('Connection error occurred. Please refresh the page.');
-        showLoading(false);
-    });
 }
 
 function showError(message) {
@@ -157,17 +123,29 @@ function showError(message) {
     if (errorDiv) {
         errorDiv.textContent = message;
         errorDiv.style.display = 'block';
-        
         setTimeout(() => {
             errorDiv.style.display = 'none';
         }, 3000);
     }
+    console.error(message);
+}
+
+function showSuccess(message) {
+    const successDiv = document.getElementById('saveSuccess');
+    if (successDiv) {
+        successDiv.textContent = message;
+        successDiv.style.display = 'block';
+        setTimeout(() => {
+            successDiv.style.display = 'none';
+        }, 3000);
+    }
+    console.log(message);
 }
 
 function showLoading(show) {
     const loadingDiv = document.getElementById('loading');
     if (loadingDiv) {
-        loadingDiv.style.display = show ? 'block' : 'none';
+        loadingDiv.style.display = show ? 'flex' : 'none';
     }
 }
 

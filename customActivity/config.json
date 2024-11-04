@@ -3,7 +3,8 @@
     "metaData": {
         "icon": "images/icon.png",
         "iconSmall": "images/iconSmall.png",
-        "category": "custom"
+        "category": "custom",
+        "isConfigured": true
     },
     "type": "REST",
     "lang": {
@@ -14,7 +15,11 @@
     },
     "arguments": {
         "execute": {
-            "inArguments": [],
+            "inArguments": [{
+                "email": "{{Contact.Attribute.PreferredData.Email}}",
+                "name": "{{Contact.Attribute.PreferredData.Name}}",
+                "contactKey": "{{Contact.Key}}"
+            }],
             "outArguments": [],
             "url": "https://customactivity.netlify.app/execute",
             "verb": "POST",
@@ -53,7 +58,40 @@
     "schema": {
         "arguments": {
             "execute": {
-                "inArguments": [],
+                "inArguments": [
+                    {
+                        "email": {
+                            "dataType": "Text",
+                            "isNullable": false,
+                            "direction": "in"
+                        },
+                        "name": {
+                            "dataType": "Text",
+                            "isNullable": true,
+                            "direction": "in"
+                        },
+                        "contactKey": {
+                            "dataType": "Text",
+                            "isNullable": false,
+                            "direction": "in"
+                        },
+                        "endpointUrl": {
+                            "dataType": "Text",
+                            "isNullable": false,
+                            "direction": "in"
+                        },
+                        "headers": {
+                            "dataType": "Text",
+                            "isNullable": true,
+                            "direction": "in"
+                        },
+                        "bodyTemplate": {
+                            "dataType": "Text",
+                            "isNullable": true,
+                            "direction": "in"
+                        }
+                    }
+                ],
                 "outArguments": []
             }
         }
