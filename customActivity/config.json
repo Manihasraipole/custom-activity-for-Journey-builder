@@ -50,46 +50,5 @@
             "width": 800,
             "fullscreen": false
         }
-    },
-    "schema": {
-        "arguments": {
-            "execute": {
-                "inArguments": [
-                    {
-                        "email": {
-                            "dataType": "Text",
-                            "isNullable": false,
-                            "direction": "in"
-                        },
-                        "name": {
-                            "dataType": "Text",
-                            "isNullable": true,
-                            "direction": "in"
-                        },
-                        "contactKey": {
-                            "dataType": "Text",
-                            "isNullable": false,
-                            "direction": "in"
-                        },
-                        "endpointUrl": {
-                            "dataType": "Text",
-                            "isNullable": false,
-                            "direction": "in"
-                        },
-                        "headers": {
-                            "dataType": "Text",
-                            "isNullable": true,
-                            "direction": "in"
-                        },
-                        "bodyTemplate": {
-                            "dataType": "Text",
-                            "isNullable": true,
-                            "direction": "in"
-                        }
-                    }
-                ],
-                "outArguments": []
-            }
-        }
     }
 } 
