@@ -2,50 +2,46 @@
     "workflowApiVersion": "1.1",
     "metaData": {
         "icon": "images/icon.png",
-        "iconSmall": "images/iconSmall.png",
-        "category": "custom",
-        "isConfigured": true
+        "iconSmall": "images/iconSmall.png"
     },
     "type": "REST",
     "lang": {
         "en-US": {
             "name": "Custom Data Extension Activity",
-            "description": "Write to a Data Extension"
+            "description": "Send data to external endpoint"
         }
     },
     "arguments": {
         "execute": {
-            "inArguments": [{
-                "email": "{{Contact.Attribute.PreferredData.Email}}",
-                "name": "{{Contact.Attribute.PreferredData.Name}}",
-                "contactKey": "{{Contact.Key}}"
-            }],
+            "inArguments": [],
             "outArguments": [],
-            "url": "https://customactivity.netlify.app/execute",
-            "verb": "POST",
-            "body": "",
-            "header": "",
-            "format": "json",
-            "useJwt": false,
-            "timeout": 10000
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/execute"
+        },
+        "save": {
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/save"
+        },
+        "publish": {
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/publish"
+        },
+        "validate": {
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/validate"
+        },
+        "stop": {
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/stop"
         }
     },
     "configurationArguments": {
         "save": {
-            "url": "https://customactivity.netlify.app/save",
-            "verb": "POST"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/save"
         },
         "publish": {
-            "url": "https://customactivity.netlify.app/publish",
-            "verb": "POST"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/publish"
         },
         "validate": {
-            "url": "https://customactivity.netlify.app/validate",
-            "verb": "POST"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/validate"
         },
         "stop": {
-            "url": "https://customactivity.netlify.app/stop",
-            "verb": "POST"
+            "url": "https://customactivity.netlify.app/.netlify/functions/api/stop"
         }
     },
     "userInterfaces": {
