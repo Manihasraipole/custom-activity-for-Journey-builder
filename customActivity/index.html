@@ -93,62 +93,91 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Add styles for modal */
+        .modal-close {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+        }
+
+        .modal-close:focus {
+            outline: 2px solid #0070cd;
+            border-radius: 4px;
+        }
+
+        [inert] {
+            pointer-events: none;
+            cursor: default;
+        }
+
+        [inert] * {
+            user-select: none;
+        }
     </style>
 </head>
 <body>
-    <div id="loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); justify-content: center; align-items: center; z-index: 1000;">
-        <div style="text-align: center;">
+    <div id="loading" class="loading-container" inert>
+        <div class="loading-content">
             <div class="spinner"></div>
-            <p style="margin-top: 10px;">Loading...</p>
+            <p>Loading...</p>
         </div>
     </div>
 
-    <div class="form-group">
-        <h2>API Configuration</h2>
-        
-        <div class="section">
-            <h3 class="section-title">Endpoint Configuration</h3>
-            <label for="endpointUrl">External Endpoint URL:</label>
-            <input type="text" id="endpointUrl" placeholder="https://your-api-endpoint.com/data" />
-            <div id="endpointError" class="error">Please enter a valid endpoint URL</div>
-        </div>
+    <main id="main-content">
+        <div class="form-group">
+            <h2>API Configuration</h2>
+            
+            <div class="section">
+                <h3 class="section-title">Endpoint Configuration</h3>
+                <label for="endpointUrl">External Endpoint URL:</label>
+                <input type="text" id="endpointUrl" placeholder="https://your-api-endpoint.com/data" />
+                <div id="endpointError" class="error" role="alert">Please enter a valid endpoint URL</div>
+            </div>
 
-        <div class="section">
-            <h3 class="section-title">Headers Configuration</h3>
-            <p>Enter headers in JSON format (e.g., {"Authorization": "Bearer token", "Content-Type": "application/json"})</p>
-            <textarea id="headers" placeholder='{
+            <div class="section">
+                <h3 class="section-title">Headers Configuration</h3>
+                <p>Enter headers in JSON format (e.g., {"Authorization": "Bearer token", "Content-Type": "application/json"})</p>
+                <textarea id="headers" placeholder='{
     "Content-Type": "application/json",
     "Authorization": "Bearer your-token"
 }'></textarea>
-            <div id="headersError" class="error">Please enter valid JSON for headers</div>
-        </div>
+                <div id="headersError" class="error" role="alert">Please enter valid JSON for headers</div>
+            </div>
 
-        <div class="section">
-            <h3 class="section-title">Request Body Template</h3>
-            <p>Enter body template in JSON format. Use {{Contact.Attribute.PreferredData.Email}} and {{Contact.Attribute.PreferredData.Name}} as placeholders</p>
-            <textarea id="bodyTemplate" placeholder='{
+            <div class="section">
+                <h3 class="section-title">Request Body Template</h3>
+                <p>Enter body template in JSON format. Use {{Contact.Attribute.PreferredData.Email}} and {{Contact.Attribute.PreferredData.Name}} as placeholders</p>
+                <textarea id="bodyTemplate" placeholder='{
     "email": "{{Contact.Attribute.PreferredData.Email}}",
     "name": "{{Contact.Attribute.PreferredData.Name}}",
     "customField": "value"
 }'></textarea>
-            <div id="bodyError" class="error">Please enter valid JSON for body template</div>
-        </div>
-        
-        <div class="button-container">
-            <button id="saveEndpoint" class="save-button">Save Configuration</button>
-        </div>
-        <div id="saveSuccess" class="success">Configuration saved successfully!</div>
+                <div id="bodyError" class="error" role="alert">Please enter valid JSON for body template</div>
+            </div>
+            
+            <div class="button-container">
+                <button id="saveEndpoint" class="save-button">Save Configuration</button>
+            </div>
+            <div id="saveSuccess" class="success" role="alert">Configuration saved successfully!</div>
 
-        <div class="data-fields">
-            <h3>Available Contact Fields:</h3>
-            <ul>
-                <li>Email: {{Contact.Attribute.PreferredData.Email}}</li>
-                <li>Name: {{Contact.Attribute.PreferredData.Name}}</li>
-            </ul>
+            <div class="data-fields">
+                <h3>Available Contact Fields:</h3>
+                <ul>
+                    <li>Email: {{Contact.Attribute.PreferredData.Email}}</li>
+                    <li>Name: {{Contact.Attribute.PreferredData.Name}}</li>
+                </ul>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <div id="errorMessage" style="display: none; color: red; margin: 10px 0;"></div>
+    <div id="errorMessage" role="alert" style="display: none; color: red; margin: 10px 0;"></div>
 
     <script>
         // Initialize connection immediately
@@ -161,6 +190,10 @@
         var currentStep = steps[0].key;
 
         $(document).ready(function() {
+            // Show loading state
+            $('#loading').css('display', 'flex').removeAttr('inert');
+            $('#main-content').attr('inert', '');
+
             // Setup event handlers before triggering ready
             connection.on('initActivity', handleInitActivity);
             connection.on('requestedTokens', handleTokens);
@@ -199,8 +232,9 @@
                 enabled: true
             });
 
-            // Hide loading indicator
-            $('#loading').hide();
+            // Hide loading and show main content
+            $('#loading').hide().attr('inert', '');
+            $('#main-content').removeAttr('inert');
         }
 
         function handleTokens(tokens) {
