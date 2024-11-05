@@ -6,7 +6,7 @@
         "category": "custom",
         "configurationDisabled": false,
         "partnerApiVersion": "1.0",
-        "isConfigured": true
+        "isConfigured": false
     },
     "type": "REST",
     "lang": {
@@ -17,24 +17,17 @@
     },
     "arguments": {
         "execute": {
-            "inArguments": [{
-                "email": "{{Contact.Attribute.PreferredData.Email}}",
-                "name": "{{Contact.Attribute.PreferredData.Name}}",
-                "contactKey": "{{Contact.Key}}"
-            }],
+            "inArguments": [],
             "outArguments": [],
             "url": "https://customactivity.netlify.app/.netlify/functions/api/execute",
             "verb": "POST",
             "body": "",
             "header": {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {{token}}"
+                "Content-Type": "application/json"
             },
             "format": "json",
-            "useJwt": true,
-            "timeout": 10000,
-            "retryCount": 3,
-            "retryDelay": 1000
+            "useJwt": false,
+            "timeout": 10000
         }
     },
     "configurationArguments": {
@@ -42,85 +35,37 @@
         "save": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/save",
             "verb": "POST",
-            "useJwt": true,
-            "header": {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {{token}}"
-            }
+            "useJwt": false
         },
         "publish": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/publish",
             "verb": "POST",
-            "useJwt": true,
-            "header": {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {{token}}"
-            }
+            "useJwt": false
         },
         "validate": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/validate",
             "verb": "POST",
-            "useJwt": true,
-            "header": {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {{token}}"
-            }
+            "useJwt": false
         },
         "stop": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/stop",
             "verb": "POST",
-            "useJwt": true,
-            "header": {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer {{token}}"
-            }
+            "useJwt": false
         }
     },
     "userInterfaces": {
-        "configInspector": {
-            "hideHeader": false,
-            "size": "medium"
+        "configModal": {
+            "height": 600,
+            "width": 800,
+            "fullscreen": false
         }
     },
     "schema": {
         "arguments": {
             "execute": {
-                "inArguments": [{
-                    "email": {
-                        "dataType": "Text",
-                        "isNullable": false,
-                        "direction": "in",
-                        "access": "visible"
-                    },
-                    "name": {
-                        "dataType": "Text",
-                        "isNullable": true,
-                        "direction": "in",
-                        "access": "visible"
-                    },
-                    "contactKey": {
-                        "dataType": "Text",
-                        "isNullable": false,
-                        "direction": "in",
-                        "access": "visible"
-                    }
-                }],
+                "inArguments": [],
                 "outArguments": []
             }
         }
-    },
-    "outcomes": {
-        "error": {
-            "next": "error"
-        },
-        "success": {
-            "next": "done"
-        }
-    },
-    "errors": {
-        "type": "text",
-        "values": [
-            "error"
-        ]
     }
 } 
