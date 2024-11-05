@@ -18,13 +18,48 @@ app.use((req, res, next) => {
     next();
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).json({
-        status: 'error',
-        message: err.message || 'Internal server error'
-    });
+// Validate endpoint
+app.post('/api/validate', (req, res) => {
+    try {
+        console.log('Validate payload:', JSON.stringify(req.body, null, 2));
+        
+        // Check if the activity has required configurations
+        const activity = req.body;
+        const hasInArguments = Boolean(
+            activity.arguments &&
+            activity.arguments.execute &&
+            activity.arguments.execute.inArguments &&
+            activity.arguments.execute.inArguments.length > 0
+        );
+
+        if (!hasInArguments) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Activity is missing required configurations'
+            });
+        }
+
+        const inArguments = activity.arguments.execute.inArguments[0];
+        
+        // Validate required fields
+        if (!inArguments.email || !inArguments.contactKey) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Required fields are missing'
+            });
+        }
+
+        res.status(200).json({ 
+            status: 'ok',
+            message: 'Configuration is valid'
+        });
+    } catch (error) {
+        console.error('Validate error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: error.message || 'Failed to validate configuration'
+        });
+    }
 });
 
 // Execute endpoint
@@ -86,23 +121,6 @@ app.post('/api/publish', (req, res) => {
         res.status(500).json({
             status: 'error',
             message: error.message || 'Failed to publish activity'
-        });
-    }
-});
-
-// Validate endpoint
-app.post('/api/validate', (req, res) => {
-    try {
-        console.log('Validate payload:', JSON.stringify(req.body, null, 2));
-        res.status(200).json({ 
-            status: 'ok',
-            message: 'Configuration is valid'
-        });
-    } catch (error) {
-        console.error('Validate error:', error);
-        res.status(500).json({
-            status: 'error',
-            message: error.message || 'Failed to validate configuration'
         });
     }
 });
