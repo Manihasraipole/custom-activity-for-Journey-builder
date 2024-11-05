@@ -3,7 +3,10 @@
     "metaData": {
         "icon": "images/icon.png",
         "iconSmall": "images/iconSmall.png",
-        "category": "custom"
+        "category": "custom",
+        "configurationDisabled": false,
+        "partnerApiVersion": "1.0",
+        "isConfigured": true
     },
     "type": "REST",
     "lang": {
@@ -28,10 +31,14 @@
             },
             "format": "json",
             "useJwt": true,
-            "timeout": 10000
+            "timeout": 10000,
+            "retryCount": 3,
+            "retryDelay": 1000
         }
     },
     "configurationArguments": {
+        "applicationExtensionKey": "custom-activity",
+        "defaults": { "activity": "customactivity" },
         "save": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/save",
             "verb": "POST",
@@ -75,9 +82,32 @@
     "schema": {
         "arguments": {
             "execute": {
-                "inArguments": [],
+                "inArguments": [
+                    {
+                        "email": {
+                            "dataType": "Text",
+                            "isNullable": false,
+                            "direction": "in"
+                        },
+                        "name": {
+                            "dataType": "Text",
+                            "isNullable": true,
+                            "direction": "in"
+                        },
+                        "contactKey": {
+                            "dataType": "Text",
+                            "isNullable": false,
+                            "direction": "in"
+                        }
+                    }
+                ],
                 "outArguments": []
             }
         }
+    },
+    "edit": {
+        "url": "https://customactivity.netlify.app/",
+        "height": 600,
+        "width": 800
     }
 } 
