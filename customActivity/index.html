@@ -151,121 +151,141 @@
     <div id="errorMessage" style="display: none; color: red; margin: 10px 0;"></div>
 
     <script>
+        // Initialize connection immediately
+        var connection = new Postmonger.Session();
+        var payload = {};
+        var tokens = {};
+        var steps = [ 
+            { "label": "Configure API", "key": "step1" }
+        ];
+        var currentStep = steps[0].key;
+
         $(document).ready(function() {
-            // Initialize Postmonger
-            var connection = new Postmonger.Session();
-            var payload = {};
-            var steps = [ 
-                { "label": "Configure API", "key": "step1" }
-            ];
-            
-            // Show loading indicator
-            $('#loading').css('display', 'flex');
+            // Setup event handlers before triggering ready
+            connection.on('initActivity', handleInitActivity);
+            connection.on('requestedTokens', handleTokens);
+            connection.on('clickedNext', handleNext);
+            connection.on('clickedBack', handleBack);
+            connection.on('gotoStep', handleGotoStep);
 
+            // Trigger the ready event after setting up handlers
             connection.trigger('ready');
-            connection.trigger('requestTokens');
-            connection.trigger('requestEndpoints');
-
-            connection.on('requestedTokens', function(tokens) {
-                console.log('Requested tokens:', tokens);
-            });
-
-            connection.on('initActivity', function(data) {
-                console.log('Initialize activity data:', data);
-                if (data) {
-                    payload = data;
-                }
-
-                var hasInArguments = Boolean(
-                    payload['arguments'] &&
-                    payload['arguments'].execute &&
-                    payload['arguments'].execute.inArguments &&
-                    payload['arguments'].execute.inArguments.length > 0
-                );
-
-                if (hasInArguments) {
-                    var inArguments = payload['arguments'].execute.inArguments[0];
-                    $('#endpointUrl').val(inArguments.endpointUrl || '');
-                    $('#headers').val(inArguments.headers ? JSON.stringify(inArguments.headers, null, 4) : '');
-                    $('#bodyTemplate').val(inArguments.bodyTemplate ? JSON.stringify(inArguments.bodyTemplate, null, 4) : '');
-                }
-
-                // Hide loading indicator
-                $('#loading').hide();
-            });
-
-            $('#saveEndpoint').click(function() {
-                saveConfiguration();
-            });
-
-            function isValidJSON(str) {
-                try {
-                    JSON.parse(str);
-                    return true;
-                } catch (e) {
-                    return false;
-                }
-            }
-
-            function saveConfiguration() {
-                var endpointUrl = $('#endpointUrl').val().trim();
-                var headers = $('#headers').val().trim();
-                var bodyTemplate = $('#bodyTemplate').val().trim();
-                var hasError = false;
-
-                // Validate URL
-                try {
-                    new URL(endpointUrl);
-                    $('#endpointError').hide();
-                } catch (e) {
-                    $('#endpointError').text('Please enter a valid URL').show();
-                    hasError = true;
-                }
-
-                // Validate headers JSON
-                if (headers && !isValidJSON(headers)) {
-                    $('#headersError').show();
-                    hasError = true;
-                } else {
-                    $('#headersError').hide();
-                }
-
-                // Validate body template JSON
-                if (bodyTemplate && !isValidJSON(bodyTemplate)) {
-                    $('#bodyError').show();
-                    hasError = true;
-                } else {
-                    $('#bodyError').hide();
-                }
-
-                if (hasError) {
-                    return;
-                }
-
-                // Save the configuration
-                payload.arguments = payload.arguments || {};
-                payload.arguments.execute = payload.arguments.execute || {};
-                payload.arguments.execute.inArguments = [{
-                    "endpointUrl": endpointUrl,
-                    "headers": headers ? JSON.parse(headers) : {},
-                    "bodyTemplate": bodyTemplate ? JSON.parse(bodyTemplate) : {},
-                    "email": "{{Contact.Attribute.PreferredData.Email}}",
-                    "name": "{{Contact.Attribute.PreferredData.Name}}"
-                }];
-
-                payload.metaData.isConfigured = true;
-
-                console.log('Saving payload:', payload);
-                connection.trigger('updateActivity', payload);
-
-                $('#saveSuccess').show().delay(3000).fadeOut();
-                connection.trigger('setActivityDirtyState', false);
-            }
-
-            connection.on('clickedNext', function() {
-                saveConfiguration();
-            });
         });
+
+        function handleInitActivity(data) {
+            console.log('Initialize activity data:', data);
+            if (data) {
+                payload = data;
+            }
+
+            var hasInArguments = Boolean(
+                payload['arguments'] &&
+                payload['arguments'].execute &&
+                payload['arguments'].execute.inArguments &&
+                payload['arguments'].execute.inArguments.length > 0
+            );
+
+            if (hasInArguments) {
+                var inArguments = payload['arguments'].execute.inArguments[0];
+                $('#endpointUrl').val(inArguments.endpointUrl || '');
+                $('#headers').val(inArguments.headers ? JSON.stringify(inArguments.headers, null, 4) : '');
+                $('#bodyTemplate').val(inArguments.bodyTemplate ? JSON.stringify(inArguments.bodyTemplate, null, 4) : '');
+            }
+
+            connection.trigger('updateButton', {
+                button: 'next',
+                text: 'done',
+                visible: true,
+                enabled: true
+            });
+
+            // Hide loading indicator
+            $('#loading').hide();
+        }
+
+        function handleTokens(tokens) {
+            console.log('Requested tokens:', tokens);
+            // Store tokens for later use
+            tokens = tokens;
+        }
+
+        function handleNext() {
+            if (currentStep === 'step1') {
+                save();
+            }
+        }
+
+        function handleBack() {
+            connection.trigger('prevStep');
+        }
+
+        function handleGotoStep(step) {
+            currentStep = step.key;
+        }
+
+        function save() {
+            var endpointUrl = $('#endpointUrl').val().trim();
+            var headers = $('#headers').val().trim();
+            var bodyTemplate = $('#bodyTemplate').val().trim();
+            var hasError = false;
+
+            // Validate URL
+            try {
+                new URL(endpointUrl);
+                $('#endpointError').hide();
+            } catch (e) {
+                $('#endpointError').text('Please enter a valid URL').show();
+                hasError = true;
+            }
+
+            // Validate headers JSON
+            if (headers && !isValidJSON(headers)) {
+                $('#headersError').show();
+                hasError = true;
+            } else {
+                $('#headersError').hide();
+            }
+
+            // Validate body template JSON
+            if (bodyTemplate && !isValidJSON(bodyTemplate)) {
+                $('#bodyError').show();
+                hasError = true;
+            } else {
+                $('#bodyError').hide();
+            }
+
+            if (hasError) {
+                return;
+            }
+
+            // Save the configuration
+            payload['arguments'] = payload['arguments'] || {};
+            payload['arguments'].execute = payload['arguments'].execute || {};
+            payload['arguments'].execute.inArguments = [{
+                "endpointUrl": endpointUrl,
+                "headers": headers ? JSON.parse(headers) : {},
+                "bodyTemplate": bodyTemplate ? JSON.parse(bodyTemplate) : {},
+                "email": "{{Contact.Attribute.PreferredData.Email}}",
+                "name": "{{Contact.Attribute.PreferredData.Name}}",
+                "contactKey": "{{Contact.Key}}"
+            }];
+
+            payload['metaData'].isConfigured = true;
+
+            console.log('Saving payload:', payload);
+            connection.trigger('updateActivity', payload);
+        }
+
+        $('#saveEndpoint').click(save);
+
+        function isValidJSON(str) {
+            try {
+                JSON.parse(str);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
     </script>
 </body>
 </html> 
