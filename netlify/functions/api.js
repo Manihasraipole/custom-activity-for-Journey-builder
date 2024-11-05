@@ -1,5 +1,6 @@
 const express = require('express');
 const serverless = require('serverless-http');
+const jwt = require('jsonwebtoken');
 const app = express();
 
 // Middleware to parse JSON bodies
@@ -11,19 +12,37 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     
-    // Handle preflight requests
     if (req.method === 'OPTIONS') {
         return res.status(200).end();
     }
     next();
 });
 
+// JWT verification middleware
+const verifyJWT = (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.decode(token);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
+};
+
+// Apply JWT verification to all API routes
+app.use('/api/*', verifyJWT);
+
 // Validate endpoint
 app.post('/api/validate', (req, res) => {
     try {
         console.log('Validate payload:', JSON.stringify(req.body, null, 2));
         
-        // Check if the activity has required configurations
         const activity = req.body;
         const hasInArguments = Boolean(
             activity.arguments &&
@@ -33,19 +52,9 @@ app.post('/api/validate', (req, res) => {
         );
 
         if (!hasInArguments) {
-            return res.status(400).json({
+            return res.status(200).json({
                 status: 'error',
                 message: 'Activity is missing required configurations'
-            });
-        }
-
-        const inArguments = activity.arguments.execute.inArguments[0];
-        
-        // Validate required fields
-        if (!inArguments.email || !inArguments.contactKey) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'Required fields are missing'
             });
         }
 
@@ -55,7 +64,7 @@ app.post('/api/validate', (req, res) => {
         });
     } catch (error) {
         console.error('Validate error:', error);
-        res.status(500).json({
+        res.status(200).json({
             status: 'error',
             message: error.message || 'Failed to validate configuration'
         });
@@ -67,24 +76,21 @@ app.post('/api/execute', async (req, res) => {
     try {
         console.log('Execute payload:', JSON.stringify(req.body, null, 2));
         
-        // Extract activity instance
         const activity = req.body.inArguments ? req.body.inArguments[0] : {};
         
-        // Log the received data
         console.log('Activity data:', {
             email: activity.email,
             name: activity.name,
             contactKey: activity.contactKey
         });
 
-        // Send success response
         res.status(200).json({
             status: 'ok',
             message: 'Activity executed successfully'
         });
     } catch (error) {
         console.error('Execute error:', error);
-        res.status(500).json({
+        res.status(200).json({
             status: 'error',
             message: error.message || 'Failed to execute activity'
         });
@@ -101,7 +107,7 @@ app.post('/api/save', (req, res) => {
         });
     } catch (error) {
         console.error('Save error:', error);
-        res.status(500).json({
+        res.status(200).json({
             status: 'error',
             message: error.message || 'Failed to save configuration'
         });
@@ -118,7 +124,7 @@ app.post('/api/publish', (req, res) => {
         });
     } catch (error) {
         console.error('Publish error:', error);
-        res.status(500).json({
+        res.status(200).json({
             status: 'error',
             message: error.message || 'Failed to publish activity'
         });
@@ -135,12 +141,11 @@ app.post('/api/stop', (req, res) => {
         });
     } catch (error) {
         console.error('Stop error:', error);
-        res.status(500).json({
+        res.status(200).json({
             status: 'error',
             message: error.message || 'Failed to stop activity'
         });
     }
 });
 
-// Export the serverless function
-exports.handler = serverless(app); 
+exports.handler = serverless(app);

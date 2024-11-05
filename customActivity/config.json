@@ -27,7 +27,8 @@
             "verb": "POST",
             "body": "",
             "header": {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{token}}"
             },
             "format": "json",
             "useJwt": true,
@@ -43,7 +44,8 @@
             "verb": "POST",
             "useJwt": true,
             "header": {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{token}}"
             }
         },
         "publish": {
@@ -51,7 +53,8 @@
             "verb": "POST",
             "useJwt": true,
             "header": {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{token}}"
             }
         },
         "validate": {
@@ -59,7 +62,8 @@
             "verb": "POST",
             "useJwt": true,
             "header": {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{token}}"
             }
         },
         "stop": {
@@ -67,7 +71,8 @@
             "verb": "POST",
             "useJwt": true,
             "header": {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": "Bearer {{token}}"
             }
         }
     },
@@ -75,11 +80,6 @@
         "configInspector": {
             "hideHeader": false,
             "size": "medium"
-        },
-        "configModal": {
-            "height": 600,
-            "width": 800,
-            "fullscreen": false
         }
     },
     "schema": {
@@ -103,28 +103,24 @@
                         "isNullable": false,
                         "direction": "in",
                         "access": "visible"
-                    },
-                    "endpointUrl": {
-                        "dataType": "Text",
-                        "isNullable": false,
-                        "direction": "in",
-                        "access": "visible"
-                    },
-                    "headers": {
-                        "dataType": "Text",
-                        "isNullable": true,
-                        "direction": "in",
-                        "access": "visible"
-                    },
-                    "bodyTemplate": {
-                        "dataType": "Text",
-                        "isNullable": true,
-                        "direction": "in",
-                        "access": "visible"
                     }
                 }],
                 "outArguments": []
             }
         }
+    },
+    "outcomes": {
+        "error": {
+            "next": "error"
+        },
+        "success": {
+            "next": "done"
+        }
+    },
+    "errors": {
+        "type": "text",
+        "values": [
+            "error"
+        ]
     }
 } 
