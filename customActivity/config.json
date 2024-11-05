@@ -24,8 +24,7 @@
             "verb": "POST",
             "body": "",
             "header": {
-                "Content-Type": "application/json",
-                "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: www.google-analytics.com; font-src 'self' data:; frame-src 'self' *;"
+                "Content-Type": "application/json"
             },
             "format": "json",
             "useJwt": true,

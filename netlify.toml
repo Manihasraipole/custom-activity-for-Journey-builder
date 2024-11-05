@@ -17,8 +17,7 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: www.google-analytics.com; font-src 'self' data:; frame-src 'self' *;"
-    X-Frame-Options = "SAMEORIGIN"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self' https://*.marketingcloudapps.com https://*.exacttarget.com https://*.salesforce.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.marketingcloudapps.com https://*.exacttarget.com https://*.salesforce.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.marketingcloudapps.com https://*.exacttarget.com https://*.salesforce.com; font-src 'self' data:; frame-ancestors https://*.salesforce.com https://*.exacttarget.com https://*.marketingcloudapps.com;"
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept, Authorization"
