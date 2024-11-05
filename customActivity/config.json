@@ -23,7 +23,10 @@
             "url": "https://customactivity.netlify.app/.netlify/functions/api/execute",
             "verb": "POST",
             "body": "",
-            "header": "",
+            "header": {
+                "Content-Type": "application/json",
+                "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: www.google-analytics.com; font-src 'self' data:; frame-src 'self' *;"
+            },
             "format": "json",
             "useJwt": true,
             "timeout": 10000
@@ -33,22 +36,34 @@
         "save": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/save",
             "verb": "POST",
-            "useJwt": true
+            "useJwt": true,
+            "header": {
+                "Content-Type": "application/json"
+            }
         },
         "publish": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/publish",
             "verb": "POST",
-            "useJwt": true
+            "useJwt": true,
+            "header": {
+                "Content-Type": "application/json"
+            }
         },
         "validate": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/validate",
             "verb": "POST",
-            "useJwt": true
+            "useJwt": true,
+            "header": {
+                "Content-Type": "application/json"
+            }
         },
         "stop": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/stop",
             "verb": "POST",
-            "useJwt": true
+            "useJwt": true,
+            "header": {
+                "Content-Type": "application/json"
+            }
         }
     },
     "userInterfaces": {
