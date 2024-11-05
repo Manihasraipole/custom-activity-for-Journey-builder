@@ -5,6 +5,95 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Custom Activity</title>
+    
+    <!-- Include required libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/postmonger@0.0.16/postmonger.min.js"></script>
+
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .form-group {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .section-title {
+            margin-top: 0;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+            font-family: monospace;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: -8px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        .success {
+            color: green;
+            text-align: center;
+            margin: 10px 0;
+            display: none;
+        }
+        .button-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .save-button {
+            background-color: #0070cd;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .save-button:hover {
+            background-color: #005ba4;
+        }
+        .data-fields {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
     <div id="loading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); justify-content: center; align-items: center; z-index: 1000;">
@@ -62,113 +151,120 @@
     <div id="errorMessage" style="display: none; color: red; margin: 10px 0;"></div>
 
     <script>
-        var connection = new Postmonger.Session();
-        var payload = {};
-        var steps = [ 
-            { "label": "Configure API", "key": "step1" }
-        ];
-
         $(document).ready(function() {
+            // Initialize Postmonger
+            var connection = new Postmonger.Session();
+            var payload = {};
+            var steps = [ 
+                { "label": "Configure API", "key": "step1" }
+            ];
+            
+            // Show loading indicator
+            $('#loading').css('display', 'flex');
+
             connection.trigger('ready');
             connection.trigger('requestTokens');
             connection.trigger('requestEndpoints');
 
+            connection.on('requestedTokens', function(tokens) {
+                console.log('Requested tokens:', tokens);
+            });
+
+            connection.on('initActivity', function(data) {
+                console.log('Initialize activity data:', data);
+                if (data) {
+                    payload = data;
+                }
+
+                var hasInArguments = Boolean(
+                    payload['arguments'] &&
+                    payload['arguments'].execute &&
+                    payload['arguments'].execute.inArguments &&
+                    payload['arguments'].execute.inArguments.length > 0
+                );
+
+                if (hasInArguments) {
+                    var inArguments = payload['arguments'].execute.inArguments[0];
+                    $('#endpointUrl').val(inArguments.endpointUrl || '');
+                    $('#headers').val(inArguments.headers ? JSON.stringify(inArguments.headers, null, 4) : '');
+                    $('#bodyTemplate').val(inArguments.bodyTemplate ? JSON.stringify(inArguments.bodyTemplate, null, 4) : '');
+                }
+
+                // Hide loading indicator
+                $('#loading').hide();
+            });
+
             $('#saveEndpoint').click(function() {
                 saveConfiguration();
             });
-        });
 
-        connection.on('requestedTokens', function(tokens) {
-            console.log('Requested tokens:', tokens);
-        });
-
-        connection.on('initActivity', function(data) {
-            console.log('Initialize activity data:', data);
-            if (data) {
-                payload = data;
+            function isValidJSON(str) {
+                try {
+                    JSON.parse(str);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
             }
 
-            var hasInArguments = Boolean(
-                payload['arguments'] &&
-                payload['arguments'].execute &&
-                payload['arguments'].execute.inArguments &&
-                payload['arguments'].execute.inArguments.length > 0
-            );
+            function saveConfiguration() {
+                var endpointUrl = $('#endpointUrl').val().trim();
+                var headers = $('#headers').val().trim();
+                var bodyTemplate = $('#bodyTemplate').val().trim();
+                var hasError = false;
 
-            if (hasInArguments) {
-                var inArguments = payload['arguments'].execute.inArguments[0];
-                $('#endpointUrl').val(inArguments.endpointUrl || '');
-                $('#headers').val(inArguments.headers ? JSON.stringify(inArguments.headers, null, 4) : '');
-                $('#bodyTemplate').val(inArguments.bodyTemplate ? JSON.stringify(inArguments.bodyTemplate, null, 4) : '');
-            }
-        });
+                // Validate URL
+                try {
+                    new URL(endpointUrl);
+                    $('#endpointError').hide();
+                } catch (e) {
+                    $('#endpointError').text('Please enter a valid URL').show();
+                    hasError = true;
+                }
 
-        function isValidJSON(str) {
-            try {
-                JSON.parse(str);
-                return true;
-            } catch (e) {
-                return false;
-            }
-        }
+                // Validate headers JSON
+                if (headers && !isValidJSON(headers)) {
+                    $('#headersError').show();
+                    hasError = true;
+                } else {
+                    $('#headersError').hide();
+                }
 
-        function saveConfiguration() {
-            var endpointUrl = $('#endpointUrl').val().trim();
-            var headers = $('#headers').val().trim();
-            var bodyTemplate = $('#bodyTemplate').val().trim();
-            var hasError = false;
+                // Validate body template JSON
+                if (bodyTemplate && !isValidJSON(bodyTemplate)) {
+                    $('#bodyError').show();
+                    hasError = true;
+                } else {
+                    $('#bodyError').hide();
+                }
 
-            // Validate URL
-            try {
-                new URL(endpointUrl);
-                $('#endpointError').hide();
-            } catch (e) {
-                $('#endpointError').text('Please enter a valid URL').show();
-                hasError = true;
-            }
+                if (hasError) {
+                    return;
+                }
 
-            // Validate headers JSON
-            if (headers && !isValidJSON(headers)) {
-                $('#headersError').show();
-                hasError = true;
-            } else {
-                $('#headersError').hide();
-            }
+                // Save the configuration
+                payload.arguments = payload.arguments || {};
+                payload.arguments.execute = payload.arguments.execute || {};
+                payload.arguments.execute.inArguments = [{
+                    "endpointUrl": endpointUrl,
+                    "headers": headers ? JSON.parse(headers) : {},
+                    "bodyTemplate": bodyTemplate ? JSON.parse(bodyTemplate) : {},
+                    "email": "{{Contact.Attribute.PreferredData.Email}}",
+                    "name": "{{Contact.Attribute.PreferredData.Name}}"
+                }];
 
-            // Validate body template JSON
-            if (bodyTemplate && !isValidJSON(bodyTemplate)) {
-                $('#bodyError').show();
-                hasError = true;
-            } else {
-                $('#bodyError').hide();
-            }
+                payload.metaData.isConfigured = true;
 
-            if (hasError) {
-                return;
+                console.log('Saving payload:', payload);
+                connection.trigger('updateActivity', payload);
+
+                $('#saveSuccess').show().delay(3000).fadeOut();
+                connection.trigger('setActivityDirtyState', false);
             }
 
-            // Save the configuration
-            payload.arguments = payload.arguments || {};
-            payload.arguments.execute = payload.arguments.execute || {};
-            payload.arguments.execute.inArguments = [{
-                "endpointUrl": endpointUrl,
-                "headers": headers ? JSON.parse(headers) : {},
-                "bodyTemplate": bodyTemplate ? JSON.parse(bodyTemplate) : {},
-                "email": "{{Contact.Attribute.PreferredData.Email}}",
-                "name": "{{Contact.Attribute.PreferredData.Name}}"
-            }];
-
-            payload.metaData.isConfigured = true;
-
-            console.log('Saving payload:', payload);
-            connection.trigger('updateActivity', payload);
-
-            $('#saveSuccess').show().delay(3000).fadeOut();
-            connection.trigger('setActivityDirtyState', false);
-        }
-
-        connection.on('clickedNext', function() {
-            saveConfiguration();
+            connection.on('clickedNext', function() {
+                saveConfiguration();
+            });
         });
     </script>
 </body>
