@@ -6,7 +6,7 @@
         "category": "custom",
         "configurationDisabled": false,
         "partnerApiVersion": "1.0",
-        "isConfigured": true
+        "isConfigured": false
     },
     "type": "REST",
     "lang": {
@@ -17,11 +17,7 @@
     },
     "arguments": {
         "execute": {
-            "inArguments": [{
-                "email": "{{Contact.Attribute.PreferredData.Email}}",
-                "name": "{{Contact.Attribute.PreferredData.Name}}",
-                "contactKey": "{{Contact.Key}}"
-            }],
+            "inArguments": [],
             "outArguments": [],
             "url": "https://customactivity.netlify.app/.netlify/functions/api/execute",
             "verb": "POST",
@@ -84,6 +80,21 @@
             "execute": {
                 "inArguments": [
                     {
+                        "endpointUrl": {
+                            "dataType": "Text",
+                            "isNullable": false,
+                            "direction": "in"
+                        },
+                        "headers": {
+                            "dataType": "Text",
+                            "isNullable": true,
+                            "direction": "in"
+                        },
+                        "bodyTemplate": {
+                            "dataType": "Text",
+                            "isNullable": true,
+                            "direction": "in"
+                        },
                         "email": {
                             "dataType": "Text",
                             "isNullable": false,
