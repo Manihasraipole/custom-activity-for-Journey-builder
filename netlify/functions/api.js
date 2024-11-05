@@ -1,76 +1,73 @@
-exports.handler = async function(event, context) {
-    // Enable CORS
-    const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
-    };
+const express = require('express');
+const serverless = require('serverless-http');
+const app = express();
 
-    // Handle OPTIONS request for CORS
-    if (event.httpMethod === 'OPTIONS') {
-        return {
-            statusCode: 200,
-            headers,
-            body: ''
-        };
+// Middleware to parse JSON bodies
+app.use(express.json());
+
+// Handle CORS
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
     }
+    next();
+});
 
-    const path = event.path.split('/').pop();
-
+// Execute endpoint
+app.post('/api/execute', async (req, res) => {
     try {
-        switch (path) {
-            case 'validate':
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({ success: true })
-                };
+        console.log('Execute payload:', req.body);
+        
+        // Here you would typically process the inArguments
+        const inArguments = req.body.inArguments[0];
+        
+        // Log the received data
+        console.log('Received data:', {
+            email: inArguments.email,
+            name: inArguments.name,
+            contactKey: inArguments.contactKey
+        });
 
-            case 'publish':
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({ success: true })
-                };
-
-            case 'save':
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({ success: true })
-                };
-
-            case 'execute':
-                const data = JSON.parse(event.body);
-                // Log the incoming data
-                console.log('Execute data:', data);
-                
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({ success: true })
-                };
-
-            case 'stop':
-                return {
-                    statusCode: 200,
-                    headers,
-                    body: JSON.stringify({ success: true })
-                };
-
-            default:
-                return {
-                    statusCode: 404,
-                    headers,
-                    body: JSON.stringify({ error: 'Not Found' })
-                };
-        }
+        // Send success response
+        res.status(200).json({
+            status: 'ok',
+            message: 'Data received successfully'
+        });
     } catch (error) {
-        console.error('Error:', error);
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({ error: 'Internal Server Error' })
-        };
+        console.error('Execute error:', error);
+        res.status(500).json({
+            status: 'error',
+            message: error.message
+        });
     }
-}; 
+});
+
+// Save endpoint
+app.post('/api/save', (req, res) => {
+    console.log('Save payload:', req.body);
+    res.status(200).json({ status: 'ok' });
+});
+
+// Publish endpoint
+app.post('/api/publish', (req, res) => {
+    console.log('Publish payload:', req.body);
+    res.status(200).json({ status: 'ok' });
+});
+
+// Validate endpoint
+app.post('/api/validate', (req, res) => {
+    console.log('Validate payload:', req.body);
+    res.status(200).json({ status: 'ok' });
+});
+
+// Stop endpoint
+app.post('/api/stop', (req, res) => {
+    console.log('Stop payload:', req.body);
+    res.status(200).json({ status: 'ok' });
+});
+
+// Export the serverless function
+exports.handler = serverless(app); 
