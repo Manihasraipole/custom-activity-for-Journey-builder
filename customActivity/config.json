@@ -6,7 +6,7 @@
         "category": "custom",
         "configurationDisabled": false,
         "partnerApiVersion": "1.0",
-        "isConfigured": false
+        "isConfigured": true
     },
     "type": "REST",
     "lang": {
@@ -17,7 +17,11 @@
     },
     "arguments": {
         "execute": {
-            "inArguments": [],
+            "inArguments": [{
+                "email": "{{Contact.Attribute.PreferredData.Email}}",
+                "name": "{{Contact.Attribute.PreferredData.Name}}",
+                "contactKey": "{{Contact.Key}}"
+            }],
             "outArguments": [],
             "url": "https://customactivity.netlify.app/.netlify/functions/api/execute",
             "verb": "POST",
@@ -34,7 +38,6 @@
     },
     "configurationArguments": {
         "applicationExtensionKey": "custom-activity",
-        "defaults": { "activity": "customactivity" },
         "save": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/save",
             "verb": "POST",
@@ -69,6 +72,10 @@
         }
     },
     "userInterfaces": {
+        "configInspector": {
+            "hideHeader": false,
+            "size": "medium"
+        },
         "configModal": {
             "height": 600,
             "width": 800,
@@ -78,47 +85,46 @@
     "schema": {
         "arguments": {
             "execute": {
-                "inArguments": [
-                    {
-                        "endpointUrl": {
-                            "dataType": "Text",
-                            "isNullable": false,
-                            "direction": "in"
-                        },
-                        "headers": {
-                            "dataType": "Text",
-                            "isNullable": true,
-                            "direction": "in"
-                        },
-                        "bodyTemplate": {
-                            "dataType": "Text",
-                            "isNullable": true,
-                            "direction": "in"
-                        },
-                        "email": {
-                            "dataType": "Text",
-                            "isNullable": false,
-                            "direction": "in"
-                        },
-                        "name": {
-                            "dataType": "Text",
-                            "isNullable": true,
-                            "direction": "in"
-                        },
-                        "contactKey": {
-                            "dataType": "Text",
-                            "isNullable": false,
-                            "direction": "in"
-                        }
+                "inArguments": [{
+                    "email": {
+                        "dataType": "Text",
+                        "isNullable": false,
+                        "direction": "in",
+                        "access": "visible"
+                    },
+                    "name": {
+                        "dataType": "Text",
+                        "isNullable": true,
+                        "direction": "in",
+                        "access": "visible"
+                    },
+                    "contactKey": {
+                        "dataType": "Text",
+                        "isNullable": false,
+                        "direction": "in",
+                        "access": "visible"
+                    },
+                    "endpointUrl": {
+                        "dataType": "Text",
+                        "isNullable": false,
+                        "direction": "in",
+                        "access": "visible"
+                    },
+                    "headers": {
+                        "dataType": "Text",
+                        "isNullable": true,
+                        "direction": "in",
+                        "access": "visible"
+                    },
+                    "bodyTemplate": {
+                        "dataType": "Text",
+                        "isNullable": true,
+                        "direction": "in",
+                        "access": "visible"
                     }
-                ],
+                }],
                 "outArguments": []
             }
         }
-    },
-    "edit": {
-        "url": "https://customactivity.netlify.app/",
-        "height": 600,
-        "width": 800
     }
 } 
