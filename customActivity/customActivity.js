@@ -145,6 +145,21 @@ function initializeActivity() {
             connection.trigger('updateActivity', payload);
         }
     }
+
+    // Handle modal close button properly
+    const closeButtons = document.querySelectorAll('.close[data-dismiss="modal"]');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const modal = this.closest('.modal');
+            if (modal) {
+                // Remove focus when closing
+                button.blur();
+                // Handle modal closing
+                $(modal).modal('hide');
+            }
+        });
+    });
 }
 
 function showError(message) {
