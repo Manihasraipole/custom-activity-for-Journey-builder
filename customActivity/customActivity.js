@@ -74,6 +74,15 @@ function initializeActivity() {
 
         // Enable the save button
         document.getElementById('saveEndpoint').disabled = false;
+
+        // Validate saved endpoint
+        if (data && data.arguments && data.arguments.execute.inArguments) {
+            const inArgs = data.arguments.execute.inArguments[0];
+            if (!inArgs || !inArgs.endpointUrl) {
+                payload['metaData'].isConfigured = false;
+                showError('No valid endpoint configured');
+            }
+        }
     });
 
     // Remove the duplicate ready trigger from the click handler
@@ -90,12 +99,21 @@ function initializeActivity() {
         const headers = document.getElementById('headers').value.trim();
         const bodyTemplate = document.getElementById('bodyTemplate').value.trim();
 
+        // Add validation for endpoint URL
+        if (!endpointUrl) {
+            showError('Endpoint URL is required');
+            return;
+        }
+
         try {
+            // Validate URL format
+            new URL(endpointUrl);
+            
             // Validate JSON formats
             const headerObj = headers ? JSON.parse(headers) : {};
             const bodyObj = bodyTemplate ? JSON.parse(bodyTemplate) : {};
 
-            // Update the payload
+            // Update the payload with validated data
             payload['arguments'].execute.inArguments = [{
                 "endpointUrl": endpointUrl,
                 "headers": headerObj,
@@ -105,15 +123,26 @@ function initializeActivity() {
                 "contactKey": "{{Contact.Key}}"
             }];
 
+            // Ensure the payload has required properties
+            payload['metaData'] = payload['metaData'] || {};
             payload['metaData'].isConfigured = true;
+
+            // Add validation status
+            payload['isValid'] = true;
             
-            console.log('Saving configuration:', payload);
+            console.log('Saving validated configuration:', payload);
             connection.trigger('updateActivity', payload);
             
-            showSuccess('Configuration saved successfully!');
+            showSuccess('Configuration saved and validated successfully!');
         } catch (e) {
-            console.error('Error saving configuration:', e);
-            showError('Invalid JSON format in headers or body template');
+            console.error('Validation error:', e);
+            if (e instanceof TypeError) {
+                showError('Invalid endpoint URL format');
+            } else {
+                showError('Invalid JSON format in headers or body template');
+            }
+            payload['isValid'] = false;
+            connection.trigger('updateActivity', payload);
         }
     }
 }

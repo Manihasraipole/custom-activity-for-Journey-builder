@@ -35,17 +35,26 @@
         "save": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/save",
             "verb": "POST",
-            "useJwt": false
+            "useJwt": false,
+            "timeout": 10000,
+            "retryCount": 2,
+            "retryDelay": 10000
         },
         "publish": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/publish",
             "verb": "POST",
-            "useJwt": false
+            "useJwt": false,
+            "timeout": 10000,
+            "retryCount": 2,
+            "retryDelay": 10000
         },
         "validate": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/validate",
             "verb": "POST",
-            "useJwt": false
+            "useJwt": false,
+            "timeout": 10000,
+            "retryCount": 2,
+            "retryDelay": 10000
         },
         "stop": {
             "url": "https://customactivity.netlify.app/.netlify/functions/api/stop",
